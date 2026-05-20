@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Usuario;
 
 class controller_api extends Controller
 {
@@ -72,6 +73,42 @@ class controller_api extends Controller
                 'authenticated' => false,
                 'message' => 'Token inválido'
             ], 401);
+        }
+    }
+
+    public function register(Request $request)
+    {
+        try {
+
+            // VALIDACIONES
+            $request->validate([
+                'nombre' => 'required|string|max:255',
+                'email' => 'required|email|unique:usuarios,email',
+                'password' => 'required|min:6'
+            ]);
+
+            // CREAR USUARIO
+            $usuario = Usuario::create([
+                'nombre' => $request->nombre,
+                'email' => $request->email,
+                'password' => bcrypt($request->password)
+            ]);
+
+            // GENERAR TOKEN JWT
+            $token = Auth::guard('api')->login($usuario);
+
+            return response()->json([
+                'message' => 'Usuario creado correctamente',
+                'token' => $token,
+                'user' => $usuario
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => 'Error al crear usuario',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
