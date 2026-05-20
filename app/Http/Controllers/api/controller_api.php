@@ -26,11 +26,13 @@ class controller_api extends Controller
         if (!$token = Auth::guard('api')->attempt($credentials)) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'Credenciales incorrectas'
             ], 401);
         }
 
         return response()->json([
+            'status'=> '100',
             'token' => $token,
             'type' => 'Bearer',
             'user' => auth('api')->user()
@@ -43,12 +45,14 @@ class controller_api extends Controller
             Auth::guard('api')->logout();
 
             return response()->json([
+                'status'=> '100',
                 'message' => 'Sesión cerrada correctamente'
             ]);
 
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'No se pudo cerrar sesión'
             ], 500);
         }
@@ -61,11 +65,13 @@ class controller_api extends Controller
             if (!$user = Auth::guard('api')->user()) {
 
                 return response()->json([
+                    'status'=> '0',
                     'authenticated' => false
                 ], 401);
             }
 
             return response()->json([
+                'status'=> '100',
                 'authenticated' => true,
                 'user' => $user
             ]);
@@ -73,6 +79,7 @@ class controller_api extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'authenticated' => false,
                 'message' => 'Token inválido'
             ], 401);
@@ -102,6 +109,7 @@ class controller_api extends Controller
             $token = Auth::guard('api')->login($usuario);
 
             return response()->json([
+                'status'=> '100',
                 'message' => 'Usuario creado correctamente',
                 'token' => $token,
                 'user' => $usuario
@@ -110,6 +118,7 @@ class controller_api extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'Error al crear usuario',
                 'error' => $e->getMessage()
             ], 500);
@@ -137,7 +146,10 @@ class controller_api extends Controller
 
         ->get();
 
-        return response()->json($conversaciones);
+        return response()->json([
+            'status'=> count($conversaciones) > 0 ? '100': '0',
+            'conversaciones' => $conversaciones
+        ]);
     }
 
     //GET - obtener información de una conversación relacionada con el usuario
@@ -155,6 +167,7 @@ class controller_api extends Controller
             if (!$conversacion) {
 
                 return response()->json([
+                    'status'=> '0',
                     'message' => 'Conversación no encontrada'
                 ], 404);
             }
@@ -169,6 +182,7 @@ class controller_api extends Controller
             if (!$pertenece) {
 
                 return response()->json([
+                    'status'=> '0',
                     'message' => 'No autorizado'
                 ], 403);
             }
@@ -183,6 +197,7 @@ class controller_api extends Controller
                 ->get();
 
             return response()->json([
+                'status'=> '100',
                 'conversacion' => $conversacion,
                 'mensajes' => $mensajes
             ]);
@@ -190,6 +205,7 @@ class controller_api extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'Error al obtener mensajes',
                 'error' => $e->getMessage()
             ], 500);
@@ -214,6 +230,7 @@ class controller_api extends Controller
             if ($usuarioAuth == $usuarioReceptor) {
 
                 return response()->json([
+                    'status'=> '0',
                     'message' => 'No puedes crear una conversación contigo mismo'
                 ], 400);
             }
@@ -236,6 +253,7 @@ class controller_api extends Controller
             if ($conversacion) {
 
                 return response()->json([
+                    'status'=> '0',
                     'message' => 'La conversación ya existe',
                     'conversacion' => $conversacion
                 ]);
@@ -252,6 +270,7 @@ class controller_api extends Controller
             ]);
 
             return response()->json([
+                'status'=> '100',
                 'message' => 'Conversación creada correctamente',
                 'conversacion' => $conversacion
             ], 201);
@@ -259,6 +278,7 @@ class controller_api extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'Error al crear conversación',
                 'error' => $e->getMessage()
             ], 500);
@@ -293,6 +313,7 @@ class controller_api extends Controller
             if (!$pertenece) {
 
                 return response()->json([
+                    'status'=> '0',
                     'message' => 'No tienes acceso a esta conversación'
                 ], 403);
             }
@@ -309,6 +330,7 @@ class controller_api extends Controller
             $conversacion->touch();
 
             return response()->json([
+                'status'=> '100',
                 'message' => 'Mensaje enviado correctamente',
                 'mensajeData' => $mensaje
             ], 201);
@@ -316,6 +338,7 @@ class controller_api extends Controller
         } catch (\Exception $e) {
 
             return response()->json([
+                'status'=> '0',
                 'message' => 'Error al enviar mensaje',
                 'error' => $e->getMessage()
             ], 500);
