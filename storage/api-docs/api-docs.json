@@ -178,7 +178,7 @@
                 ]
             }
         },
-        "/api/validar-sesion": {
+        "/api/validarSesion": {
             "get": {
                 "tags": [
                     "Auth"
@@ -366,7 +366,7 @@
                 }
             }
         },
-        "/api/conversaciones": {
+        "/api/obtenerMisConversaciones": {
             "get": {
                 "tags": [
                     "Conversaciones"
@@ -403,7 +403,86 @@
                         "bearerAuth": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/obtenerMensajesConversacion/{id}/mensajes": {
+            "get": {
+                "tags": [
+                    "Conversaciones"
+                ],
+                "summary": "Obtener mensajes de una conversación",
+                "description": "Retorna la conversación y todos sus mensajes ordenados cronológicamente.",
+                "operationId": "getConversationMessages",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la conversación",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mensajes obtenidos correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "conversacion": {
+                                            "type": "object"
+                                        },
+                                        "mensajes": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Conversación no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conversación no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/crearConversacion": {
             "post": {
                 "tags": [
                     "Conversaciones"
@@ -483,84 +562,7 @@
                 ]
             }
         },
-        "/api/conversaciones/{id}/mensajes": {
-            "get": {
-                "tags": [
-                    "Conversaciones"
-                ],
-                "summary": "Obtener mensajes de una conversación",
-                "description": "Retorna la conversación y todos sus mensajes ordenados cronológicamente.",
-                "operationId": "getConversationMessages",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID de la conversación",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Mensajes obtenidos correctamente",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "100"
-                                        },
-                                        "conversacion": {
-                                            "type": "object"
-                                        },
-                                        "mensajes": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Conversación no encontrada",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "0"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Conversación no encontrada"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "No autorizado"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/mensajes": {
+        "/api/enviarMensaje": {
             "post": {
                 "tags": [
                     "Mensajes"

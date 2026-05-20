@@ -172,7 +172,7 @@ class controller_api extends Controller
     }
 
     #[OA\Get(
-        path: '/api/validar-sesion',
+        path: '/api/validarSesion',
         operationId: 'validateSession',
         tags: ['Auth'],
         summary: 'Validar sesión del usuario',
@@ -361,7 +361,7 @@ class controller_api extends Controller
     }
 
     #[OA\Get(
-        path: '/api/conversaciones',
+        path: '/api/obtenerMisConversaciones',
         operationId: 'getMyConversations',
         tags: ['Conversaciones'],
         summary: 'Obtener conversaciones del usuario autenticado',
@@ -414,7 +414,7 @@ class controller_api extends Controller
     }
 
     #[OA\Get(
-        path: '/api/conversaciones/{id}/mensajes',
+        path: '/api/obtenerMensajesConversacion/{id}/mensajes',
         operationId: 'getConversationMessages',
         tags: ['Conversaciones'],
         summary: 'Obtener mensajes de una conversación',
@@ -524,7 +524,7 @@ class controller_api extends Controller
     }
 
     #[OA\Post(
-        path: '/api/conversaciones',
+        path: '/api/crearConversacion',
         operationId: 'createConversation',
         tags: ['Conversaciones'],
         summary: 'Crear nueva conversación',
@@ -644,7 +644,7 @@ class controller_api extends Controller
     }
 
     #[OA\Post(
-        path: '/api/mensajes',
+        path: '/api/enviarMensaje',
         operationId: 'sendMessage',
         tags: ['Mensajes'],
         summary: 'Enviar mensaje en una conversación',
