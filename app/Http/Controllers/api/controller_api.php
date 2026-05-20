@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Usuario;
 use App\Models\Conversacion;
+use App\Models\Mensaje;
 
 class controller_api extends Controller
 {
     // GET
-    public function saludo(Request $request){
+    public function saludo(){
         return [
             "message" => "saludo"
         ];
@@ -54,7 +55,7 @@ class controller_api extends Controller
     }
 
     //GET - validación de sesión JWT
-    public function validarSesion(Request $request){
+    public function validarSesion(){
         try {
 
             if (!$user = Auth::guard('api')->user()) {
@@ -140,8 +141,59 @@ class controller_api extends Controller
     }
 
     //GET - obtener información de una conversación relacionada con el usuario
-    public function threadsID(Request $request, $id){
+    public function obtenerMensajesConversacion(Int $conversacionId)
+    {
+        try {
 
+            // Usuario autenticado
+            $usuarioId = Auth::guard('api')->id();
+
+            // Buscar conversación
+            $conversacion = Conversacion::find($conversacionId);
+
+            // Verificar existencia
+            if (!$conversacion) {
+
+                return response()->json([
+                    'message' => 'Conversación no encontrada'
+                ], 404);
+            }
+
+            // Verificar acceso
+            $pertenece = (
+                $conversacion->usuario_1_id == $usuarioId
+                ||
+                $conversacion->usuario_2_id == $usuarioId
+            );
+
+            if (!$pertenece) {
+
+                return response()->json([
+                    'message' => 'No autorizado'
+                ], 403);
+            }
+
+            // Obtener mensajes
+            $mensajes = Mensaje::with('usuario')
+
+                ->where('conversacion_id', $conversacionId)
+
+                ->orderBy('created_at', 'asc')
+
+                ->get();
+
+            return response()->json([
+                'conversacion' => $conversacion,
+                'mensajes' => $mensajes
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => 'Error al obtener mensajes',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     //POST - creación de nueva conversación
@@ -214,13 +266,60 @@ class controller_api extends Controller
     }
 
     //POST - enviar respuesta 
-    public function createThreadResponseID(Request $request){
+    public function enviarMensaje(Request $request)
+    {
+        try {
 
-    }
+            $request->validate([
+                'conversacion_id' => 'required|exists:conversaciones,id',
+                'mensaje' => 'required|string'
+            ]);
 
-    //GET - mensajes no leídos 
-    public function notifications(Request $request){
+            // Usuario autenticado
+            $usuarioId = auth('api')->id();
 
+            // Buscar conversación
+            $conversacion = Conversacion::find(
+                $request->conversacion_id
+            );
+
+            // Verificar que pertenece a la conversación
+            $pertenece = (
+                $conversacion->usuario_1_id == $usuarioId
+                ||
+                $conversacion->usuario_2_id == $usuarioId
+            );
+
+            if (!$pertenece) {
+
+                return response()->json([
+                    'message' => 'No tienes acceso a esta conversación'
+                ], 403);
+            }
+
+            // Crear mensaje
+            $mensaje = Mensaje::create([
+                'conversacion_id' => $conversacion->id,
+                'usuario_id' => $usuarioId,
+                'mensaje' => $request->mensaje,
+                'leido' => false
+            ]);
+
+            // Actualizar timestamp conversación
+            $conversacion->touch();
+
+            return response()->json([
+                'message' => 'Mensaje enviado correctamente',
+                'mensajeData' => $mensaje
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => 'Error al enviar mensaje',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }
