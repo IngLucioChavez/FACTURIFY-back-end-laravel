@@ -51,6 +51,30 @@ class controller_api extends Controller
         }
     }
 
+    public function validarSesion(Request $request){
+        try {
+
+            if (!$user = auth('api')->user()) {
+
+                return response()->json([
+                    'authenticated' => false
+                ], 401);
+            }
+
+            return response()->json([
+                'authenticated' => true,
+                'user' => $user
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'authenticated' => false,
+                'message' => 'Token inválido'
+            ], 401);
+        }
+    }
+
     //GET - obtener conversaciones relacionadas
     public function threads(Request $request){
 

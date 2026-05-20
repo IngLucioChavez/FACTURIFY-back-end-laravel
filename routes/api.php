@@ -6,3 +6,4 @@ use App\Http\Controllers\api\controller_api;
 Route::get('/saludo', [controller_api::class,'saludo']);
 Route::post('/login', [controller_api::class,'login']);
 Route::middleware('auth:api')->post('/logout', [controller_api::class, 'logout']);
+Route::middleware('auth:api')->get('/validar-sesion',[controller_api::class, 'validarSesion']);
