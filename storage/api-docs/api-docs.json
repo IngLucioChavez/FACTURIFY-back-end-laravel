@@ -1,0 +1,649 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de mini sistema de mensajería",
+        "description": "Documentación de desarrollo",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/saludo": {
+            "get": {
+                "tags": [
+                    "Sistema"
+                ],
+                "summary": "Endpoint de prueba del sistema",
+                "description": "Permite verificar que la API está activa y respondiendo correctamente.",
+                "operationId": "saludo",
+                "responses": {
+                    "200": {
+                        "description": "Respuesta exitosa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "message": "saludo"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inicio de sesión de usuario",
+                "description": "Autentica al usuario con email y password y retorna un token JWT.",
+                "operationId": "loginUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "name": "Juan Pérez",
+                                                "email": "usuario@test.com"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Credenciales incorrectas"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cerrar sesión del usuario",
+                "description": "Invalida el token JWT actual y cierra la sesión del usuario autenticado.",
+                "operationId": "logoutUser",
+                "responses": {
+                    "200": {
+                        "description": "Sesión cerrada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sesión cerrada correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno al cerrar sesión",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se pudo cerrar sesión"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/validar-sesion": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Validar sesión del usuario",
+                "description": "Verifica si el token JWT es válido y devuelve la información del usuario autenticado.",
+                "operationId": "validateSession",
+                "responses": {
+                    "200": {
+                        "description": "Sesión válida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "authenticated": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "user": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "name": "Juan Pérez",
+                                                "email": "usuario@test.com"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado o token inválido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "authenticated": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token inválido"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/registroUsuario": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registro de nuevo usuario",
+                "description": "Crea un nuevo usuario en el sistema y retorna un token JWT automáticamente.",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario creado correctamente"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "user": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 1,
+                                                "nombre": "Juan Pérez",
+                                                "email": "usuario@test.com"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Información Inválida"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "email": [
+                                                    "The email has already been taken."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error al crear usuario"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/conversaciones": {
+            "get": {
+                "tags": [
+                    "Conversaciones"
+                ],
+                "summary": "Obtener conversaciones del usuario autenticado",
+                "description": "Devuelve todas las conversaciones donde el usuario autenticado participa.",
+                "operationId": "getMyConversations",
+                "responses": {
+                    "200": {
+                        "description": "Listado de conversaciones",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "conversaciones": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Conversaciones"
+                ],
+                "summary": "Crear nueva conversación",
+                "description": "Crea una conversación entre el usuario autenticado y otro usuario.",
+                "operationId": "createConversation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "usuario_receptor_id"
+                                ],
+                                "properties": {
+                                    "usuario_receptor_id": {
+                                        "description": "ID del usuario con quien se quiere iniciar la conversación",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Conversación creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conversación creada correctamente"
+                                        },
+                                        "conversacion": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación o lógica",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No puedes crear una conversación contigo mismo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/conversaciones/{id}/mensajes": {
+            "get": {
+                "tags": [
+                    "Conversaciones"
+                ],
+                "summary": "Obtener mensajes de una conversación",
+                "description": "Retorna la conversación y todos sus mensajes ordenados cronológicamente.",
+                "operationId": "getConversationMessages",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la conversación",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mensajes obtenidos correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "conversacion": {
+                                            "type": "object"
+                                        },
+                                        "mensajes": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Conversación no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "0"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conversación no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mensajes": {
+            "post": {
+                "tags": [
+                    "Mensajes"
+                ],
+                "summary": "Enviar mensaje en una conversación",
+                "description": "Permite enviar un mensaje dentro de una conversación existente.",
+                "operationId": "sendMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "conversacion_id",
+                                    "mensaje"
+                                ],
+                                "properties": {
+                                    "conversacion_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "mensaje": {
+                                        "type": "string",
+                                        "example": "Hola, ¿cómo estás?"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mensaje enviado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "100"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mensaje enviado correctamente"
+                                        },
+                                        "mensajeData": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin acceso a la conversación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Sistema",
+            "description": "Sistema"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Conversaciones",
+            "description": "Conversaciones"
+        },
+        {
+            "name": "Mensajes",
+            "description": "Mensajes"
+        }
+    ]
+}
