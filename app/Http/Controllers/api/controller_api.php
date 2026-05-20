@@ -4,12 +4,12 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class controller_api extends Controller
 {
     // GET
-    public function saludo(Request $request)
-    {
+    public function saludo(Request $request){
         return [
             "message" => "saludo"
         ];
@@ -20,7 +20,7 @@ class controller_api extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (!$token = auth('api')->attempt($credentials)) {
+        if (!$token = Auth::guard('api')->attempt($credentials)) {
 
             return response()->json([
                 'message' => 'Credenciales incorrectas'
@@ -37,7 +37,7 @@ class controller_api extends Controller
     public function logout(){
         try {
 
-            auth('api')->logout();
+            Auth::guard('api')->logout();
 
             return response()->json([
                 'message' => 'Sesión cerrada correctamente'
@@ -54,7 +54,7 @@ class controller_api extends Controller
     public function validarSesion(Request $request){
         try {
 
-            if (!$user = auth('api')->user()) {
+            if (!$user = Auth::guard('api')->user()) {
 
                 return response()->json([
                     'authenticated' => false
