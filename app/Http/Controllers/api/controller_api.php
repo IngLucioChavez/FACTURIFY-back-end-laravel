@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Usuario;
+use App\Models\Conversacion;
 
 class controller_api extends Controller
 {
@@ -115,8 +116,27 @@ class controller_api extends Controller
     }
 
     //GET - obtener conversaciones relacionadas del usuario
-    public function threads(Request $request){
+    public function obtenerMisConversaciones()
+    {
+        $usuarioId = Auth::guard('api')->id();
 
+        $conversaciones = Conversacion::with([
+            'usuario1',
+            'usuario2'
+        ])
+
+        ->where(function ($query) use ($usuarioId) {
+
+            $query->where('usuario_1_id', $usuarioId)
+                ->orWhere('usuario_2_id', $usuarioId);
+
+        })
+
+        ->orderBy('updated_at', 'desc')
+
+        ->get();
+
+        return response()->json($conversaciones);
     }
 
     //GET - obtener información de una conversación relacionada con el usuario
@@ -125,8 +145,68 @@ class controller_api extends Controller
     }
 
     //POST - creación de nueva conversación
-    public function createThread(Request $request){
+    public function crearConversacion(Request $request)
+    {
+        try {
 
+            $request->validate([
+                'usuario_receptor_id' => 'required|exists:usuarios,id'
+            ]);
+
+            // Usuario autenticado
+            $usuarioAuth = Auth::guard('api')->id();
+
+            $usuarioReceptor = $request->usuario_receptor_id;
+
+            // Evitar conversación consigo mismo
+            if ($usuarioAuth == $usuarioReceptor) {
+
+                return response()->json([
+                    'message' => 'No puedes crear una conversación contigo mismo'
+                ], 400);
+            }
+
+            // Verificar si ya existe conversación
+            $conversacion = Conversacion::where(function ($query) use ($usuarioAuth, $usuarioReceptor) {
+                    $query->where('usuario_1_id', $usuarioAuth)
+                        ->where('usuario_2_id', $usuarioReceptor);
+                })
+                ->orWhere(function ($query)
+                    use ($usuarioAuth, $usuarioReceptor) {
+
+                    $query->where('usuario_1_id', $usuarioReceptor)
+                        ->where('usuario_2_id', $usuarioAuth);
+
+                })
+                ->first();
+
+            // Si ya existe
+            if ($conversacion) {
+
+                return response()->json([
+                    'message' => 'La conversación ya existe',
+                    'conversacion' => $conversacion
+                ]);
+            }
+
+            // Crear conversación
+            $conversacion = Conversacion::create([
+                'usuario_1_id' => $usuarioAuth,
+                'usuario_2_id' => $usuarioReceptor
+            ]);
+
+            return response()->json([
+                'message' => 'Conversación creada correctamente',
+                'conversacion' => $conversacion
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => 'Error al crear conversación',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     //POST - enviar respuesta 
