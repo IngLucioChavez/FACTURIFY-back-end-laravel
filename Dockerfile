@@ -16,7 +16,7 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install
+RUN composer install && php artisan migrate
 
 EXPOSE 8000
 
