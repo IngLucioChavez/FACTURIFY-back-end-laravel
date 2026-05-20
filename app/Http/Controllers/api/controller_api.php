@@ -52,6 +52,7 @@ class controller_api extends Controller
         }
     }
 
+    //GET - validación de sesión JWT
     public function validarSesion(Request $request){
         try {
 
@@ -76,6 +77,7 @@ class controller_api extends Controller
         }
     }
 
+    //POST - creación de nuevo usuario con cifrado de password en tabla usuarios
     public function register(Request $request)
     {
         try {
@@ -112,12 +114,12 @@ class controller_api extends Controller
         }
     }
 
-    //GET - obtener conversaciones relacionadas
+    //GET - obtener conversaciones relacionadas del usuario
     public function threads(Request $request){
 
     }
 
-    //GET - obtener información de conversación
+    //GET - obtener información de una conversación relacionada con el usuario
     public function threadsID(Request $request, $id){
 
     }

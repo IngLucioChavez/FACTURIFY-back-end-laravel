@@ -31,4 +31,25 @@ class Usuario extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function conversacionesComoUsuario1()
+    {
+        return $this->hasMany(
+            Conversacion::class,
+            'usuario_1_id'
+        );
+    }
+
+    public function conversacionesComoUsuario2()
+    {
+        return $this->hasMany(
+            Conversacion::class,
+            'usuario_2_id'
+        );
+    }
+
+    public function mensajes()
+    {
+        return $this->hasMany(Mensaje::class);
+    }
 }
