@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class controller_api extends Controller
 {   
@@ -15,11 +16,8 @@ class controller_api extends Controller
     //POST - logeo incio de sesión JWT
     public function login(Request $request){
 
-        return [
-            "status"=> 0,
-            "message"=> "ERROR - usuario inexistente",
-            "token"=>"-"
-        ];
+        return DB::table("usuarios")
+            ->count();
 
     }
     //POST - logout finalización de sesión
