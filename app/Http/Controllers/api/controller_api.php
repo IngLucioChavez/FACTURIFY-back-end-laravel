@@ -189,10 +189,14 @@ class controller_api extends Controller
                 ]);
             }
 
+            // ordenando ids menor y mayor respectivamente
+            $usuario1 = min($usuarioAuth, $usuarioReceptor);
+            $usuario2 = max($usuarioAuth, $usuarioReceptor);
+
             // Crear conversación
             $conversacion = Conversacion::create([
-                'usuario_1_id' => $usuarioAuth,
-                'usuario_2_id' => $usuarioReceptor
+                'usuario_1_id' => $usuario1,
+                'usuario_2_id' => $usuario2
             ]);
 
             return response()->json([

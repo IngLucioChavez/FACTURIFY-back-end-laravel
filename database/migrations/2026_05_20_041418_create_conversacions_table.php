@@ -23,6 +23,11 @@ return new class extends Migration
                 ->constrained('usuarios')
                 ->onDelete('cascade');
 
+            $table->unique([
+                'usuario_1_id',
+                'usuario_2_id'
+            ]);
+
             $table->timestamps();
         });
     }
