@@ -4,24 +4,51 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class controller_api extends Controller
-{   
-    //GET - test
-    public function saludo(Request $request){
-        return ["message"=>"saludo"];
+{
+    // GET
+    public function saludo(Request $request)
+    {
+        return [
+            "message" => "saludo"
+        ];
     }
-     
-    //POST - logeo incio de sesión JWT
-    public function login(Request $request){
 
-        return DB::table("usuarios")
-            ->count();
+    // POST - LOGIN JWT
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
 
+        if (!$token = auth('api')->attempt($credentials)) {
+
+            return response()->json([
+                'message' => 'Credenciales incorrectas'
+            ], 401);
+        }
+
+        return response()->json([
+            'token' => $token,
+            'type' => 'Bearer',
+            'user' => auth('api')->user()
+        ]);
     }
     //POST - logout finalización de sesión
-    public function logout(Request $request){
+    public function logout(){
+        try {
+
+            auth('api')->logout();
+
+            return response()->json([
+                'message' => 'Sesión cerrada correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'message' => 'No se pudo cerrar sesión'
+            ], 500);
+        }
     }
 
     //GET - obtener conversaciones relacionadas
