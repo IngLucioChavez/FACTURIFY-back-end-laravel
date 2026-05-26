@@ -1,59 +1,367 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API Mini Sistema de Mensajería
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST desarrollada en Laravel para la gestión de autenticación JWT, conversaciones privadas y envío de mensajes entre usuarios.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# Tecnologías utilizadas
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel
+- JWT Authentication
+- MySQL
+- Swagger / OpenAPI
+- PHP 8+
+- Eloquent ORM
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+# Características principales
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+✅ Registro de usuarios  
+✅ Login con JWT  
+✅ Validación de sesión  
+✅ Logout seguro  
+✅ Creación de conversaciones  
+✅ Envío de mensajes  
+✅ Obtención de conversaciones del usuario  
+✅ Obtención de mensajes por conversación  
+✅ Documentación Swagger/OpenAPI  
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+# Arquitectura general
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```mermaid
+graph TD
 
-### Premium Partners
+A[Cliente Frontend] -->|HTTP Request| B[Laravel API]
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+B --> C[Auth JWT]
+B --> D[Controller API]
+B --> E[Models Eloquent]
 
-## Contributing
+E --> F[(Usuarios)]
+E --> G[(Conversaciones)]
+E --> H[(Mensajes)]
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+D --> I[Swagger OpenAPI]
+```
 
-## Code of Conduct
+# Autenticación JWT
+La API utiliza JWT para proteger las rutas privadas.
+## Flujo de Autentificación
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```mermaid
+sequenceDiagram
 
-## Security Vulnerabilities
+participant Cliente
+participant API
+participant JWT
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Cliente->>API: POST /login
+API->>JWT: Generar Token
+JWT-->>API: Token JWT
+API-->>Cliente: Token Bearer
 
-## License
+Cliente->>API: Request con Authorization Bearer TOKEN
+API->>JWT: Validar Token
+JWT-->>API: Usuario autenticado
+API-->>Cliente: Respuesta protegida
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Estructura de rutas
+
+```PHP
+Route::controller(controller_api::class)->group(function () {
+
+    // Públicas
+    Route::get('saludo', 'saludo');
+    Route::post('login', 'login');
+    Route::post('registroUsuario', 'register');
+
+    // Protegidas
+    Route::middleware('auth:api')->group(function () {
+
+        Route::post('logout', 'logout');
+        Route::get('validarSesion', 'validarSesion');
+
+        Route::get('obtenerMisConversaciones', 'obtenerMisConversaciones');
+        Route::post('crearConversacion', 'crearConversacion');
+
+        Route::post('enviarMensaje', 'enviarMensaje');
+
+        Route::get(
+            'obtenerMensajesConversacion/{id}/mensajes',
+            'obtenerMensajesConversacion'
+        );
+    });
+});
+```
+
+# Endpoints públicos
+
+## GET /api/saludo
+Endpoint de prueba.
+
+Respuesta
+```json
+{
+  "message": "saludo"
+}
+```
+
+## POST /api/login
+
+Autenticación de usuario.
+
+Body
+```JSON
+{
+  "email": "usuario@test.com",
+  "password": "123456"
+}
+```
+Respuesta exitosa
+```json
+{
+  "status": "100",
+  "token": "JWT_TOKEN",
+  "type": "Bearer",
+  "user": {
+    "id": 1,
+    "nombre": "Juan Pérez",
+    "email": "usuario@test.com"
+  }
+}
+```
+
+## POST /api/registroUsuario
+Registro de nuevos usuarios.
+
+Body
+```json
+{
+  "nombre": "Juan Pérez",
+  "email": "usuario@test.com",
+  "password": "123456"
+}
+```
+Respuesta
+```json
+{
+  "status": "100",
+  "message": "Usuario creado correctamente",
+  "token": "JWT_TOKEN",
+  "user": {
+    "id": 1,
+    "nombre": "Juan Pérez",
+    "email": "usuario@test.com"
+  }
+}
+```
+# Endpoints protegidos
+Todas las rutas protegidas requieren:
+```http
+Authorization: Bearer TU_TOKEN
+```
+## POST /api/logout
+Cerrar sesión del usuario.
+
+Respuesta
+```json
+{
+  "status": "100",
+  "message": "Sesión cerrada correctamente"
+}
+```
+
+## GET /api/validarSesion
+Validar token JWT.
+
+Respuesta
+```json
+{
+  "status": "100",
+  "authenticated": true,
+  "user": {
+    "id": 1,
+    "nombre": "Juan Pérez",
+    "email": "usuario@test.com"
+  }
+}
+```
+
+## GET /api/obtenerMisConversaciones
+Obtiene todas las conversaciones del usuario autenticado.
+
+Respuesta
+```json
+{
+  "status": "100",
+  "conversaciones": []
+}
+```
+
+## POST /api/crearConversacion
+Crea una conversación con otro usuario.
+
+Body
+```json
+{
+  "usuario_receptor_id": 2
+}
+```
+Respuesta
+```json
+{
+  "status": "100",
+  "message": "Conversación creada correctamente",
+  "conversacion": {}
+}
+```
+
+## GET /api/obtenerMensajesConversacion/{id}/mensajes
+Obtiene todos los mensajes de una conversación.
+
+Parámetros
+| Parámetro | Tipo    | Descripción           |
+| --------- | ------- | --------------------- |
+| id        | integer | ID de la conversación |
+
+Respuesta
+```json
+{
+  "status": "100",
+  "conversacion": {},
+  "mensajes": []
+}
+```
+
+## POST /api/enviarMensaje
+Enviar mensaje a una conversación existente.
+
+Body
+```json
+{
+  "conversacion_id": 1,
+  "mensaje": "Hola, ¿cómo estás?"
+}
+```
+Respuesta
+```json
+{
+  "status": "100",
+  "message": "Mensaje enviado correctamente",
+  "mensajeData": {}
+}
+```
+
+# Modelo Relacional
+```mermaid
+erDiagram
+
+USUARIOS {
+
+    bigint id
+    string nombre
+    string email
+    string password
+}
+
+CONVERSACIONES {
+
+    bigint id
+    bigint usuario_1_id
+    bigint usuario_2_id
+}
+
+MENSAJES {
+
+    bigint id
+    bigint conversacion_id
+    bigint usuario_id
+    text mensaje
+    boolean leido
+}
+
+USUARIOS ||--o{ CONVERSACIONES : participa
+USUARIOS ||--o{ MENSAJES : envia
+CONVERSACIONES ||--o{ MENSAJES : contiene
+```
+
+# Instalación del proyecto
+1️⃣ Clonar repositorio
+```bash
+git clone URL_REPOSITORIO
+```
+2️⃣ Entrar al proyecto
+```bash
+cd proyecto
+```
+3️⃣ Instalar dependencias
+```bash
+composer install
+```
+4️⃣ Configurar variables de entorno
+```bash
+cp .env.example .env
+```
+Configurar:
+```env
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+```
+5️⃣ Generar key Laravel
+```bash
+php artisan key:generate
+```
+6️⃣ Generar JWT Secret
+```bash
+php artisan jwt:secret
+```
+7️⃣ Ejecutar migraciones
+```bash
+php artisan migrate
+```
+8️⃣ Levantar servidor
+```bash
+php artisan serve
+```
+
+# Swagger/OpenAPI
+La API utiliza atributos OpenAPI para generar documentación automática.
+
+Generar documentación
+```bash
+php artisan l5-swagger:generate
+```
+Acceso Swagger UI
+
+```bash
+http://localhost:8000/api/documentation
+```
+## Seguridad implementada
+* Contraseñas cifradas con bcrypt
+* JWT Bearer Token
+* Middleware auth:api
+* Validaciones Laravel
+* Protección de acceso a conversaciones
+* Validación de pertenencia a conversaciones
+
+## Posibles mejoras futuras
+* WebSockets en tiempo real
+* Indicador de mensajes leídos
+* Notificaciones push
+* Eliminación de mensajes
+* Subida de archivos
+* Chats grupales
+* Refresh tokens
+* Rate limiting
+
+# Autor
+
+Desarrollado con Laravel y JWT Authentication.
+```
+Lucio Francisco Chávez García
+```
